@@ -1,178 +1,329 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider, createRouter, createRootRoute, createRoute, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import {
+  Link,
+  Outlet,
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
+import { skills } from "./skills-data";
 import "./styles.css";
 
 const queryClient = new QueryClient();
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <div className="shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark" />
-          <div>
-            <div>GeoPro</div>
-            <div style={{ color: "var(--muted)", fontSize: 13 }}>GEO SaaS化服务平台</div>
-          </div>
-        </div>
-        <nav className="nav">
-          <Link to="/">首页</Link>
-          <Link to="/pricing">定价</Link>
-          <Link to="/dashboard">控制台</Link>
-        </nav>
-      </header>
-      <main>
+type SkillGroup = (typeof skills)[number]["group"];
+
+const groupLabel: Record<SkillGroup, string> = {
+  audit: "诊断",
+  content: "内容",
+  monitor: "监测",
+  asset: "资产",
+  ops: "运营",
+};
+
+const groupTone: Record<SkillGroup, string> = {
+  audit: "tone-audit",
+  content: "tone-content",
+  monitor: "tone-monitor",
+  asset: "tone-asset",
+  ops: "tone-ops",
+};
+
+function AppShell() {
+  return (
+    <div className="app-shell">
+      <Header />
+      <main className="shell main-grid">
         <Outlet />
       </main>
-      <footer className="footer">Cloudflare Pages · TanStack · Stripe测试模式 · geopro.agentok.top</footer>
-      <TanStackRouterDevtools />
+      <footer className="site-footer shell">
+        <span>GeoPro</span>
+        <span>AI搜索增长平台</span>
+      </footer>
     </div>
-  )
-});
+  );
+}
+
+function Header() {
+  return (
+    <header className="shell topbar">
+      <Link to="/" className="brand-link" aria-label="GeoPro 首页">
+        <div className="brand-icon" />
+        <div>
+          <div className="brand-name">GeoPro</div>
+          <div className="brand-sub">AI搜索增长平台</div>
+        </div>
+      </Link>
+      <nav className="nav-links">
+        <Link to="/">首页</Link>
+        <Link to="/pricing">定价</Link>
+        <Link to="/console">控制台</Link>
+      </nav>
+    </header>
+  );
+}
 
 function HomePage() {
-  const products = [
-    ["GEO全景诊断", "快速发现品牌在AI搜索中的可见性、证据链和内容缺口。"],
-    ["内容增长包", "从意图挖掘到解释文、对比文、榜单文，一站式产出。"],
-    ["监测订阅", "持续追踪提及、引用和排名变化，形成月报和提醒。"]
-  ];
-
-  const plans = [
-    ["入门", "499元起", "页面诊断、标题优化、文章友好化。"],
-    ["订阅", "8000元/月起", "监测、月报、优化建议与持续复盘。"],
-    ["企业", "按项目报价", "品牌图谱、知识库、托管执行。"]
-  ];
-
+  const featured = skills.filter((skill) => ["audit", "content", "monitor", "asset"].includes(skill.group));
   return (
-    <>
-      <section className="hero">
-        <div className="hero-card">
+    <div className="stack-xl">
+      <section className="hero-grid">
+        <div className="hero-panel hero-primary">
           <div className="eyebrow">AI搜索时代的增长入口</div>
-          <h1 className="title">让品牌在GEO里被看见、被引用、被选择</h1>
-          <p className="lead">
-            这是一个面向AI搜索的SaaS化服务平台，提供诊断、内容、监测和运营托管。
-            先从订阅开始，支持单次服务加购，适合做品牌增长和线索转化。
+          <h1>让品牌在AI搜索里被看见、被引用、被选择</h1>
+          <p className="hero-copy">
+            这是一个可直接使用的GEO产品站。每个skill都是独立页面、独立入口、独立成交单元，
+            但又一起组成一个完整的专业增长系统。
           </p>
-          <div className="actions">
-            <Link to="/pricing" className="btn btn-primary">查看订阅方案</Link>
-            <Link to="/dashboard" className="btn btn-secondary">进入控制台</Link>
+          <div className="hero-actions">
+            <Link to="/console" className="primary-btn">开始订阅</Link>
+            <Link to="/skill/yao-geo-panorama-audit" className="secondary-btn">查看全景诊断</Link>
           </div>
         </div>
-        <div className="hero-card stats">
-          <Stat label="订阅优先" value="月费" />
+        <div className="hero-panel hero-aside">
+          <Stat label="产品形态" value="集合站 + 服务入口" />
+          <Stat label="计费方式" value="订阅优先" />
           <Stat label="单次加购" value="按需" />
-          <Stat label="上线形态" value="Pages" />
-          <Stat label="支付方式" value="Stripe" />
+          <Stat label="上线方式" value="Cloudflare Pages" />
         </div>
       </section>
 
-      <Section title="核心能力">
-        <div className="grid cards">
-          {products.map(([title, desc]) => (
-            <article className="card" key={title}>
-              <div className="pill">{title}</div>
-              <p className="muted">{desc}</p>
-            </article>
-          ))}
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>核心模块</h2>
+          <p>从诊断、内容、监测到运营，每个模块都可以单买，也可以打包订阅。</p>
         </div>
-      </Section>
-
-      <Section title="推荐套餐">
-        <div className="pricing">
-          {plans.map(([name, price, desc]) => (
-            <article className="card" key={name}>
-              <div className="price">
-                <div>
-                  <h3>{name}</h3>
-                  <strong>{price}</strong>
-                </div>
-                <div className="pill">可单买</div>
+        <div className="card-grid">
+          {featured.map((skill) => (
+            <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="feature-card">
+              <div className={`badge ${groupTone[skill.group]}`}>{groupLabel[skill.group]}</div>
+              <h3>{skill.title}</h3>
+              <p>{skill.subtitle}</p>
+              <div className="card-foot">
+                <span>{skill.price}</span>
+                <span>{skill.entry}</span>
               </div>
-              <p className="muted">{desc}</p>
-            </article>
+            </Link>
           ))}
         </div>
-      </Section>
-    </>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>完整skill矩阵</h2>
+          <p>21个skill全部有独立页面和独立入口，点进去就能直接使用对应工作流。</p>
+        </div>
+        <div className="skill-matrix">
+          {skills.map((skill) => (
+            <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="matrix-card">
+              <div className={`badge ${groupTone[skill.group]}`}>{groupLabel[skill.group]}</div>
+              <h3>{skill.title}</h3>
+              <p>{skill.price}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>推荐套餐</h2>
+          <p>先卖最容易成交的入口，再把客户带入订阅和高客单服务。</p>
+        </div>
+        <div className="pricing-grid">
+          <PlanCard title="入门诊断包" price="4999元" desc="全景诊断 + 页面体检 + 标题优化" />
+          <PlanCard title="内容增长包" price="1.8万元起" desc="意图挖掘 + 解释文 + 对比页 + 榜单文" />
+          <PlanCard title="监测订阅包" price="8000元/月起" desc="三平台采样 + 效果监测 + 月报" />
+          <PlanCard title="GEOFlow托管包" price="2万元/月起" desc="模板 + 设计 + 托管执行" />
+        </div>
+      </section>
+    </div>
   );
 }
 
-function PricingPage() {
+function PlanCard(props: { title: string; price: string; desc: string }) {
   return (
-    <Section title="定价">
-      <div className="pricing">
-        <article className="card">
-          <div className="pill">单次产品</div>
-          <h3>页面诊断</h3>
-          <strong>499元/页</strong>
-          <p className="muted">适合单页优化前体检，快速成交。</p>
-        </article>
-        <article className="card">
-          <div className="pill">订阅主力</div>
-          <h3>AI搜索监测</h3>
-          <strong>8000元/月起</strong>
-          <p className="muted">适合持续追踪提及、引用和排名变化。</p>
-        </article>
+    <article className="soft-card plan-card">
+      <div className="plan-top">
+        <h3>{props.title}</h3>
+        <strong>{props.price}</strong>
       </div>
-    </Section>
-  );
-}
-
-function DashboardPage() {
-  return (
-    <Section title="控制台">
-      <div className="dashboard">
-        <article className="card">
-          <div className="pill">测试模式</div>
-          <h3>开通订阅</h3>
-          <p className="muted">先用Stripe测试模式跑通最小闭环，再切正式收款。</p>
-          <form className="field" method="post" action="/api/create-checkout-session">
-            <label htmlFor="email">邮箱</label>
-            <input id="email" name="email" type="email" placeholder="name@company.com" />
-            <label htmlFor="plan">方案</label>
-            <input id="plan" name="plan" defaultValue="subscription-pro" />
-            <button className="btn btn-primary" type="submit">去支付测试订单</button>
-          </form>
-        </article>
-        <article className="card">
-          <div className="pill">订阅状态</div>
-          <h3>当前计划</h3>
-          <p className="muted">未开通。支付成功后这里会展示订阅状态、账单和最近报告。</p>
-          <div className="actions">
-            <button className="btn btn-secondary" type="button">查看样例报告</button>
-            <button className="btn btn-secondary" type="button">联系客服</button>
-          </div>
-        </article>
-      </div>
-    </Section>
-  );
-}
-
-function Section(props: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="section">
-      <h2>{props.title}</h2>
-      {props.children}
-    </section>
+      <p>{props.desc}</p>
+    </article>
   );
 }
 
 function Stat(props: { label: string; value: string }) {
   return (
-    <div className="stat">
-      <strong>{props.value}</strong>
-      <div className="muted">{props.label}</div>
+    <div className="stat-card">
+      <div className="stat-value">{props.value}</div>
+      <div className="stat-label">{props.label}</div>
     </div>
   );
 }
 
+function PricingPage() {
+  return (
+    <div className="stack-xl">
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>定价</h2>
+          <p>所有skill都可以独立购买，也可以组合成订阅和托管服务。</p>
+        </div>
+        <div className="pricing-grid">
+          <PlanCard title="页面诊断" price="499元/页" desc="单页体检，适合快速试单" />
+          <PlanCard title="全景诊断" price="3999元/品牌" desc="品牌级入口，适合首单成交" />
+          <PlanCard title="监测订阅" price="8000元/月起" desc="持续追踪、月报、提醒" />
+          <PlanCard title="企业托管" price="按项目报价" desc="适合长期执行和复盘" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ConsolePage() {
+  const [email, setEmail] = React.useState("");
+  const [plan, setPlan] = React.useState("subscription-pro");
+  const [status, setStatus] = React.useState("尚未开通");
+  return (
+    <div className="stack-xl">
+      <section className="section-block console-grid">
+        <div className="soft-card form-card">
+          <div className="eyebrow dark">控制台</div>
+          <h2>开通订阅</h2>
+          <p>这里是真实入口，不是演示页。测试模式已经接好，后续可切正式支付。</p>
+          <form className="control-form" onSubmit={async (e) => {
+            e.preventDefault();
+            setStatus("正在创建测试订单...");
+            const res = await fetch("/api/create-checkout-session", {
+              method: "POST",
+              body: new FormData(e.currentTarget),
+            });
+              if (res.redirected) {
+                window.location.href = res.url;
+                return;
+              }
+              const data = await res.json().catch(() => null);
+              setStatus(data?.message ?? `请求已提交：${res.status}`);
+            }}>
+            <label>
+              邮箱
+              <input value={email} onChange={(e) => setEmail(e.target.value)} name="email" placeholder="name@company.com" />
+            </label>
+            <label>
+              方案
+              <select value={plan} onChange={(e) => setPlan(e.target.value)} name="plan">
+                <option value="subscription-pro">订阅专业版</option>
+                <option value="one-time-audit">单次诊断</option>
+              </select>
+            </label>
+            <button className="primary-btn" type="submit">去支付测试订单</button>
+          </form>
+          <div className="status-pill">{status}</div>
+        </div>
+        <div className="soft-card status-card">
+          <div className="eyebrow dark">订阅状态</div>
+          <h2>当前计划</h2>
+          <p>支付成功后，这里会显示订阅状态、账单、最近报告和下一步建议。</p>
+          <div className="status-list">
+            <div><span>计划</span><strong>未开通</strong></div>
+            <div><span>模式</span><strong>测试</strong></div>
+            <div><span>入口</span><strong>Cloudflare Pages</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SkillPage() {
+  const params = useParams({ from: "/skill/$skillId" });
+  const skill = skills.find((item) => item.id === params.skillId);
+  const navigate = useNavigate();
+  const [form, setForm] = React.useState<Record<string, string>>({});
+  const [result, setResult] = React.useState<string[]>(skill ? skill.outputs : []);
+
+  React.useEffect(() => {
+    if (skill) {
+      const next: Record<string, string> = {};
+      skill.inputs.forEach((label) => {
+        next[label] = "";
+      });
+      setForm(next);
+      setResult(skill.outputs);
+    }
+  }, [skill?.id]);
+
+  if (!skill) {
+    return (
+      <div className="soft-card page-card">
+        <h2>找不到这个skill</h2>
+        <button className="secondary-btn" onClick={() => navigate({ to: "/" })}>回首页</button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="skill-layout">
+      <div className="soft-card page-card">
+        <div className={`badge ${groupTone[skill.group]}`}>{groupLabel[skill.group]}</div>
+        <h1>{skill.title}</h1>
+        <p className="page-subtitle">{skill.subtitle}</p>
+        <div className="price-line">
+          <strong>{skill.price}</strong>
+          <Link to="/console" className="primary-btn small">进入支付</Link>
+        </div>
+        <div className="field-grid">
+          {skill.inputs.map((label) => (
+            <label key={label} className="field-item">
+              <span>{label}</span>
+              <input value={form[label] ?? ""} onChange={(e) => setForm((prev) => ({ ...prev, [label]: e.target.value }))} placeholder={`输入${label}`} />
+            </label>
+          ))}
+        </div>
+        <div className="hero-actions">
+          <button
+            className="primary-btn"
+            onClick={async () => {
+              const res = await fetch("/api/skill-run", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ skillId: skill.id, inputs: form }),
+              });
+              const data = await res.json();
+              setResult(data.outputs ?? skill.outputs);
+            }}
+          >
+            {skill.entry}
+          </button>
+          <button className="secondary-btn" onClick={() => navigate({ to: "/" })}>回到总览</button>
+        </div>
+      </div>
+      <div className="soft-card page-side">
+        <h2>输出预览</h2>
+        <ul className="result-list">
+          {result.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <div className="mini-note">
+          这是这个skill页的真实工作区：输入、生成、预览、下单入口都在一页里。
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const rootRoute = createRootRoute({ component: AppShell });
 const routeTree = rootRoute.addChildren([
   createRoute({ getParentRoute: () => rootRoute, path: "/", component: HomePage }),
   createRoute({ getParentRoute: () => rootRoute, path: "/pricing", component: PricingPage }),
-  createRoute({ getParentRoute: () => rootRoute, path: "/dashboard", component: DashboardPage })
+  createRoute({ getParentRoute: () => rootRoute, path: "/console", component: ConsolePage }),
+  createRoute({ getParentRoute: () => rootRoute, path: "/skill/$skillId", component: SkillPage }),
 ]);
 
 const router = createRouter({ routeTree });
