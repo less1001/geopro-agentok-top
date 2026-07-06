@@ -17,8 +17,6 @@ import "./styles.css";
 
 const queryClient = new QueryClient();
 
-// Removed GSAP dependency to make it snappier, cleaner, and less "demo" feeling.
-
 type SkillGroup = (typeof skills)[number]["group"];
 
 const groupLabel: Record<SkillGroup, string> = {
@@ -33,124 +31,167 @@ const groupLabel: Record<SkillGroup, string> = {
 function AppShell() {
   return (
     <div className="app-shell">
-      <Header />
-      <main className="shell main-grid overflow-x-hidden">
+      <Sidebar />
+      <main className="main-content">
         <Outlet />
       </main>
-      <footer className="site-footer shell">
-        <span>GeoPro</span>
-        <span>AI搜索增长平台</span>
-      </footer>
     </div>
   );
 }
 
-function Header() {
+function Sidebar() {
   const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
-    <header className="shell topbar">
-      <Link to="/" className="brand-link" aria-label="GeoPro 首页">
-        <div className="brand-icon" />
-        <div>
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <Link to="/" className="brand-link" aria-label="GeoPro 首页">
+          <div className="brand-icon" />
           <div className="brand-name">GeoPro</div>
-          <div className="brand-sub">AI搜索增长平台</div>
+        </Link>
+      </div>
+
+      <nav className="sidebar-nav">
+        <div className="nav-group">
+          <div className="nav-group-title">系统功能</div>
+          <Link to="/" className={`nav-item ${currentPath === "/" ? "active" : ""}`}>
+            <span className="icon">📊</span> 平台数据
+          </Link>
+          <Link to="/console" className={`nav-item ${currentPath === "/console" ? "active" : ""}`}>
+            <span className="icon">⚙️</span> 账户概览
+          </Link>
+          <Link to="/pricing" className={`nav-item ${currentPath === "/pricing" ? "active" : ""}`}>
+            <span className="icon">💎</span> 订阅服务
+          </Link>
         </div>
-      </Link>
-      <nav className="nav-links">
-        <Link to="/" className={location.pathname === "/" ? "active" : ""}>首页</Link>
-        <Link to="/pricing" className={location.pathname === "/pricing" ? "active" : ""}>定价</Link>
-        <Link to="/console" className={location.pathname === "/console" ? "active" : ""}>控制台</Link>
+
+        {Object.entries(groupLabel).map(([group, label]) => (
+          <div key={group} className="nav-group">
+            <div className="nav-group-title">{label}分析</div>
+            {skills
+              .filter((s) => s.group === group)
+              .map((skill) => {
+                const isActive = currentPath === `/skill/${skill.id}`;
+                return (
+                  <Link
+                    key={skill.id}
+                    to="/skill/$skillId"
+                    params={{ skillId: skill.id }}
+                    className={`nav-item ${isActive ? "active" : ""}`}
+                  >
+                    {skill.title}
+                  </Link>
+                );
+              })}
+          </div>
+        ))}
       </nav>
-    </header>
+      
+      <div className="sidebar-footer">
+        <div className="user-profile">
+          <div className="avatar" />
+          <span className="user-name">未登录账户</span>
+          <span className="user-badge">基础版</span>
+        </div>
+      </div>
+    </aside>
   );
 }
 
 function HomePage() {
   const auditSkills = skills.filter(s => s.group === 'audit');
-  const contentSkills = skills.filter(s => s.group === 'content');
-  const otherSkills = skills.filter(s => s.group !== 'audit' && s.group !== 'content');
+  const monitorSkills = skills.filter(s => s.group === 'monitor');
 
   return (
-    <div className="page-stack">
-      <section className="hero-centered">
-        <h1 className="hero-title">
-          让品牌在AI搜索里<br />更容易被看见
-        </h1>
-        <p className="hero-copy">
-          GeoPro 将复杂的 Generative Engine Optimization 拆解为可直接执行的工具套件。
-          <br />无需理解复杂概念，即刻开始优化您的品牌可见度。
-        </p>
-        <div className="hero-actions">
-          <Link to="/console" className="primary-btn">开始订阅</Link>
-          <Link to="/skill/yao-geo-panorama-audit" className="secondary-btn">体验全景诊断</Link>
+    <div className="page-container">
+      <div className="page-header">
+        <h1>平台数据</h1>
+        <div className="header-actions">
+          <button className="secondary-btn small">推送到看板</button>
+          <button className="secondary-btn small">统计口径</button>
         </div>
-      </section>
+      </div>
 
-      <section className="section-block">
-        <div className="section-heading left">
-          <div className="eyebrow">第一步：了解现状</div>
-          <h2>诊断与洞察</h2>
-          <p>在行动之前，精准评估品牌在主流 AI 搜索引擎中的表现和缺口。</p>
+      {/* Mock Dashboard Widgets */}
+      <div className="dashboard-widgets">
+        <div className="widget-card">
+          <div className="widget-title">
+            今日实时数据 <span className="time-badge">更新时间 2026/07/06 23:00</span>
+          </div>
+          <div className="widget-stats">
+            <div className="stat-item">
+              <span className="stat-label">访问人数</span>
+              <div className="stat-val"><strong>135</strong> 人</div>
+              <div className="stat-trends">
+                较昨日 <span className="trend up">+213.95%</span>
+                7日前 <span className="trend up">+121.31%</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">打开次数</span>
+              <div className="stat-val"><strong>401</strong> 次</div>
+              <div className="stat-trends">
+                较昨日 <span className="trend up">+236.97%</span>
+                7日前 <span className="trend up">+126.55%</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">访问页面数</span>
+              <div className="stat-val"><strong>703</strong> 个</div>
+              <div className="stat-trends">
+                较昨日 <span className="trend up">+282.06%</span>
+                7日前 <span className="trend up">+164.28%</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="skill-grid">
-          {auditSkills.map((skill) => (
-            <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="skill-card">
-              <div className="badge">{groupLabel[skill.group]}</div>
-              <h3>{skill.title}</h3>
-              <p>{skill.subtitle}</p>
-              <div className="skill-price">{skill.price}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      </div>
 
-      <section className="section-block">
-        <div className="section-heading left">
-          <div className="eyebrow">第二步：优化资产</div>
-          <h2>内容与生成</h2>
-          <p>生成符合 AI 阅读习惯的高密度内容，提升被引用和推荐的概率。</p>
-        </div>
-        <div className="skill-grid">
-          {contentSkills.map((skill) => (
-            <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="skill-card">
-              <div className="badge">{groupLabel[skill.group]}</div>
-              <h3>{skill.title}</h3>
-              <p>{skill.subtitle}</p>
-              <div className="skill-price">{skill.price}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <div className="dashboard-row">
+        <section className="section-block">
+          <div className="section-heading left">
+            <h2>诊断提醒</h2>
+            <p>基于昨日数据，智能诊断经营与性能状况</p>
+          </div>
+          <div className="skill-grid">
+            {auditSkills.map((skill) => (
+              <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="skill-card">
+                <div className="badge">{groupLabel[skill.group]}</div>
+                <h3>{skill.title}</h3>
+                <p>{skill.subtitle}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      <section className="section-block">
-        <div className="section-heading left">
-          <div className="eyebrow">第三步：长期运营</div>
-          <h2>资产、监测与托管</h2>
-          <p>建立长期的追踪体系与品牌知识库，确保持续的搜索增长。</p>
-        </div>
-        <div className="skill-grid">
-          {otherSkills.map((skill) => (
-            <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="skill-card">
-              <div className="badge">{groupLabel[skill.group]}</div>
-              <h3>{skill.title}</h3>
-              <p>{skill.subtitle}</p>
-              <div className="skill-price">{skill.price}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <section className="section-block">
+          <div className="section-heading left">
+            <h2>监测任务</h2>
+            <p>正在持续追踪的关键数据</p>
+          </div>
+          <div className="skill-grid">
+            {monitorSkills.map((skill) => (
+              <Link key={skill.id} to="/skill/$skillId" params={{ skillId: skill.id }} className="skill-card">
+                <div className="badge">{groupLabel[skill.group]}</div>
+                <h3>{skill.title}</h3>
+                <p>{skill.subtitle}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
 function PricingPage() {
   return (
-    <div className="page-stack">
+    <div className="page-container">
+      <div className="page-header">
+        <h1>订阅方案</h1>
+      </div>
       <section className="section-block">
-        <div className="section-heading">
-          <h2>订阅方案</h2>
-          <p>选择适合您团队规模的服务计划，随时可以升级或取消。</p>
-        </div>
         <div className="pricing-grid">
           <article className="soft-card plan-card">
             <div className="plan-top">
@@ -192,10 +233,12 @@ function ConsolePage() {
   const [status, setStatus] = useState("账户尚未订阅计划");
 
   return (
-    <div className="page-stack">
+    <div className="page-container">
+      <div className="page-header">
+        <h1>账户概览</h1>
+      </div>
       <div className="console-grid">
         <div className="console-card">
-          <div className="eyebrow">管理订阅</div>
           <h2>开通服务</h2>
           <p>输入企业邮箱以启动您的服务订阅流程。支付系统处于安全模式。</p>
           <form
@@ -236,8 +279,7 @@ function ConsolePage() {
         </div>
         
         <div className="console-card">
-          <div className="eyebrow">当前状态</div>
-          <h2>账户概览</h2>
+          <h2>当前状态</h2>
           <div className="status-list">
             <div className="status-item"><span>当前计划</span><strong>基础未开通</strong></div>
             <div className="status-item"><span>计费周期</span><strong>--</strong></div>
@@ -264,15 +306,15 @@ function SkillPage() {
         next[label] = "";
       });
       setForm(next);
-      setResult(null); // Reset result when switching skills
+      setResult(null); 
     }
   }, [skill?.id]);
 
   if (!skill) {
     return (
-      <div className="hero-centered">
+      <div className="page-container">
         <h2>找不到此工具模块</h2>
-        <button className="secondary-btn" onClick={() => navigate({ to: "/" })}>返回主页</button>
+        <button className="secondary-btn" onClick={() => navigate({ to: "/" })}>返回平台数据</button>
       </div>
     );
   }
@@ -287,74 +329,76 @@ function SkillPage() {
         body: JSON.stringify({ skillId: skill.id, inputs: form }),
       });
       const data = await res.json().catch(() => null);
-      // Simulate slight delay for realistic processing feel if mock
       setTimeout(() => {
         setResult(data?.outputs ?? skill.outputs);
         setIsProcessing(false);
       }, 800);
     } catch (err) {
       setTimeout(() => {
-        setResult(skill.outputs); // fallback to mock for UI dev
+        setResult(skill.outputs); 
         setIsProcessing(false);
       }, 800);
     }
   };
 
   return (
-    <div className="workspace-layout">
-      {/* Sidebar: Configuration */}
-      <aside className="workspace-sidebar">
-        <div className="workspace-hero">
-          <div className="badge">{groupLabel[skill.group]}</div>
-          <h1>{skill.title}</h1>
-          <p>{skill.subtitle}</p>
+    <div className="page-container">
+      <div className="page-header">
+        <h1>{skill.title}</h1>
+        <div className="header-actions">
+          <span className="badge">{groupLabel[skill.group]}</span>
         </div>
-        
-        <div className="workspace-form">
-          {skill.inputs.map((label) => (
-            <div key={label} className="form-field">
-              <label>{label}</label>
-              <input
-                value={form[label] ?? ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, [label]: e.target.value }))}
-                placeholder={`请输入${label}`}
-              />
-            </div>
-          ))}
-          <button 
-            className="primary-btn" 
-            onClick={handleRun}
-            disabled={isProcessing}
-            style={{ marginTop: '12px' }}
-          >
-            {isProcessing ? "处理中..." : skill.entry}
-          </button>
-        </div>
-      </aside>
+      </div>
+      <p style={{ marginTop: '-12px', marginBottom: '24px', color: 'var(--muted)' }}>{skill.subtitle}</p>
 
-      {/* Main Canvas: Execution / Output */}
-      <section className="workspace-canvas">
-        <div className="canvas-header">
-          <h2>输出面板</h2>
-          <p>运行结果或预览大纲将展示于此。</p>
-        </div>
-        
-        <div className="result-content">
-          {isProcessing && (
-            <div style={{ color: "var(--muted)" }}>系统正在分析数据，请稍候...</div>
-          )}
-          {!isProcessing && !result && (
-            <div style={{ color: "var(--line)" }}>在左侧配置参数并运行以查看结果。</div>
-          )}
-          {!isProcessing && result && (
-            <ul>
-              {result.map((item, idx) => (
-                <li key={idx}>{item}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+      <div className="workspace-layout">
+        <aside className="workspace-sidebar">
+          <div className="workspace-form">
+            <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px' }}>参数配置</h3>
+            {skill.inputs.map((label) => (
+              <div key={label} className="form-field">
+                <label>{label}</label>
+                <input
+                  value={form[label] ?? ""}
+                  onChange={(e) => setForm((prev) => ({ ...prev, [label]: e.target.value }))}
+                  placeholder={`请输入${label}`}
+                />
+              </div>
+            ))}
+            <button 
+              className="primary-btn" 
+              onClick={handleRun}
+              disabled={isProcessing}
+              style={{ marginTop: '12px' }}
+            >
+              {isProcessing ? "执行中..." : skill.entry}
+            </button>
+          </div>
+        </aside>
+
+        <section className="workspace-canvas">
+          <div className="canvas-header">
+            <h2>执行结果</h2>
+            <p>输出的数据、报告或资源将在此展示。</p>
+          </div>
+          
+          <div className="result-content">
+            {isProcessing && (
+              <div style={{ color: "var(--muted)" }}>系统正在执行分析，请稍候...</div>
+            )}
+            {!isProcessing && !result && (
+              <div style={{ color: "var(--line)" }}>在左侧配置参数并运行即可查看结果。</div>
+            )}
+            {!isProcessing && result && (
+              <ul>
+                {result.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
@@ -382,3 +426,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
