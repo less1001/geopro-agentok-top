@@ -42,6 +42,20 @@ function AppShell() {
 function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = { sys: true }; // System group open by default
+    if (currentPath.startsWith("/skill/")) {
+      const skillId = currentPath.replace("/skill/", "");
+      const activeSkill = skills.find(s => s.id === skillId);
+      if (activeSkill) initial[activeSkill.group] = true;
+    }
+    return initial;
+  });
+
+  const toggleGroup = (group: string) => {
+    setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
+  };
 
   return (
     <aside className="sidebar">
@@ -54,36 +68,46 @@ function Sidebar() {
 
       <nav className="sidebar-nav">
         <div className="nav-group">
-          <div className="nav-group-title">系统功能</div>
-          <Link to="/" className={`nav-item ${currentPath === "/" ? "active" : ""}`}>
-            <span className="icon">📊</span> 平台数据
-          </Link>
-          <Link to="/console" className={`nav-item ${currentPath === "/console" ? "active" : ""}`}>
-            <span className="icon">⚙️</span> 账户概览
-          </Link>
-          <Link to="/pricing" className={`nav-item ${currentPath === "/pricing" ? "active" : ""}`}>
-            <span className="icon">💎</span> 订阅服务
-          </Link>
+          <div className="nav-group-title" onClick={() => toggleGroup("sys")}>
+            系统功能
+            <span className={`chevron ${expandedGroups["sys"] ? "expanded" : ""}`}>▾</span>
+          </div>
+          <div className={`nav-group-content ${expandedGroups["sys"] ? "expanded" : ""}`}>
+            <Link to="/" className={`nav-item ${currentPath === "/" ? "active" : ""}`}>
+              <span className="icon">📊</span> 平台数据
+            </Link>
+            <Link to="/console" className={`nav-item ${currentPath === "/console" ? "active" : ""}`}>
+              <span className="icon">⚙️</span> 账户概览
+            </Link>
+            <Link to="/pricing" className={`nav-item ${currentPath === "/pricing" ? "active" : ""}`}>
+              <span className="icon">💎</span> 订阅服务
+            </Link>
+          </div>
         </div>
 
         {Object.entries(groupLabel).map(([group, label]) => (
           <div key={group} className="nav-group">
-            <div className="nav-group-title">{label}分析</div>
-            {skills
-              .filter((s) => s.group === group)
-              .map((skill) => {
-                const isActive = currentPath === `/skill/${skill.id}`;
-                return (
-                  <Link
-                    key={skill.id}
-                    to="/skill/$skillId"
-                    params={{ skillId: skill.id }}
-                    className={`nav-item ${isActive ? "active" : ""}`}
-                  >
-                    {skill.title}
-                  </Link>
-                );
-              })}
+            <div className="nav-group-title" onClick={() => toggleGroup(group)}>
+              {label}分析
+              <span className={`chevron ${expandedGroups[group] ? "expanded" : ""}`}>▾</span>
+            </div>
+            <div className={`nav-group-content ${expandedGroups[group] ? "expanded" : ""}`}>
+              {skills
+                .filter((s) => s.group === group)
+                .map((skill) => {
+                  const isActive = currentPath === `/skill/${skill.id}`;
+                  return (
+                    <Link
+                      key={skill.id}
+                      to="/skill/$skillId"
+                      params={{ skillId: skill.id }}
+                      className={`nav-item ${isActive ? "active" : ""}`}
+                    >
+                      {skill.title}
+                    </Link>
+                  );
+                })}
+            </div>
           </div>
         ))}
       </nav>

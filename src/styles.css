@@ -88,8 +88,43 @@ button, input, select { font: inherit; outline: none; }
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0 12px;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.nav-group-title:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.chevron {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  transform: rotate(-90deg);
+}
+.chevron.expanded {
+  transform: rotate(0deg);
+}
+.nav-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, margin 0.3s ease-in-out;
+}
+.nav-group-content.expanded {
+  max-height: 1000px;
+  opacity: 1;
   margin-bottom: 8px;
+}
+.nav-group-content .nav-item {
+  padding-left: 12px; /* Or add extra if needed, but original was 12px, let's keep it clean or make it 24px */
 }
 .nav-item {
   display: flex;
