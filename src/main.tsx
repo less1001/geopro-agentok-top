@@ -42,6 +42,17 @@ function AppShell() {
 function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark" || saved === "light") return saved;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
   
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = { sys: true }; // System group open by default
@@ -117,6 +128,13 @@ function Sidebar() {
           <div className="avatar" />
           <span className="user-name">未登录账户</span>
           <span className="user-badge">基础版</span>
+          <button 
+            className="theme-toggle" 
+            onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+            title="切换暗色/亮色"
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
         </div>
       </div>
     </aside>

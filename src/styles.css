@@ -15,6 +15,20 @@
   --radius-sm: 12px;
 }
 
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --sidebar-bg: #151515;
+  --surface: #1c1c1e;
+  --text: #f5f5f7;
+  --muted: #8e8e93;
+  --line: rgba(255, 255, 255, 0.12);
+  --blue: #0a84ff;
+  --blue-hover: #409cff;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; padding: 0; }
 body {
@@ -64,6 +78,12 @@ button, input, select { font: inherit; outline: none; }
   height: 16px;
   border: 2px solid #fff;
   border-radius: 50%;
+}
+[data-theme='dark'] .brand-icon {
+  background: #f5f5f7;
+}
+[data-theme='dark'] .brand-icon::after {
+  border-color: #1d1d1f;
 }
 .brand-name { font-weight: 600; letter-spacing: -0.02em; font-size: 16px; color: var(--text); }
 
@@ -144,6 +164,9 @@ button, input, select { font: inherit; outline: none; }
   background: rgba(0, 113, 227, 0.08);
   color: var(--blue);
 }
+[data-theme='dark'] .nav-item.active {
+  background: rgba(10, 132, 255, 0.15);
+}
 .nav-item .icon { font-size: 16px; }
 
 .sidebar-footer {
@@ -168,6 +191,32 @@ button, input, select { font: inherit; outline: none; }
   padding: 2px 6px;
   border-radius: 4px;
   color: var(--text);
+}
+[data-theme='dark'] .user-badge {
+  background: #3a3a3c;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+.theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text);
+}
+[data-theme='dark'] .theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .main-content {
@@ -223,6 +272,7 @@ button, input, select { font: inherit; outline: none; }
   padding: 4px 8px;
   border-radius: 4px;
 }
+[data-theme='dark'] .time-badge { background: rgba(255,255,255,0.08); }
 .widget-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -271,9 +321,15 @@ button, input, select { font: inherit; outline: none; }
 .secondary-btn {
   background: rgba(0, 0, 0, 0.04);
   color: var(--text);
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
 }
 .secondary-btn:hover { background: rgba(0, 0, 0, 0.08); }
+[data-theme='dark'] .secondary-btn {
+  background: rgba(255, 255, 255, 0.08);
+}
+[data-theme='dark'] .secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* --- Sections --- */
 .section-block {
