@@ -383,6 +383,10 @@ function SkillPage() {
     }
   };
 
+  if (skill.id === "yao-geo-page-audit") {
+    return <PluginAuditPage skill={skill} />;
+  }
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -445,6 +449,172 @@ function SkillPage() {
   );
 }
 
+function PluginAuditPage({ skill }: { skill: (typeof skills)[number] }) {
+  const [form, setForm] = React.useState({
+    页面URL: "https://example.com/pricing",
+    页面类型: "产品页",
+    目标关键词: "GEO优化",
+  });
+  const [score, setScore] = React.useState(82);
+  const [notes, setNotes] = React.useState([
+    "标题已覆盖主题，但可再向问题表达靠近",
+    "首屏摘要足够清晰，建议增加一条对比证据",
+    "FAQ区可补充引用型短句，提升被抽取概率",
+  ]);
+
+  const modules = [
+    "页面体检",
+    "标题优化",
+    "旧文升级",
+    "解释文生成",
+    "GEO全景诊断",
+  ];
+
+  React.useEffect(() => {
+    const quality = form.页面URL.length + form.目标关键词.length + form.页面类型.length;
+    setScore(72 + (quality % 19));
+  }, [form]);
+
+  return (
+    <section className="plugin-shell">
+      <aside className="plugin-sidebar soft-card">
+        <div className="plugin-brand">
+          <div className="brand-icon small" />
+          <div>
+            <div className="brand-name">GeoPro</div>
+            <div className="brand-sub">GEO Browser Assistant</div>
+          </div>
+        </div>
+        <div className="plugin-menu">
+          {modules.map((item, index) => (
+            <button key={item} className={`plugin-menu-item ${index === 0 ? "active" : ""}`} type="button">
+              <span>{item}</span>
+              {index === 0 ? <em>当前</em> : null}
+            </button>
+          ))}
+        </div>
+        <div className="plugin-footer">
+          <div className="plugin-kv">
+            <span>当前域名</span>
+            <strong>example.com</strong>
+          </div>
+          <div className="plugin-kv">
+            <span>套餐状态</span>
+            <strong>专业版</strong>
+          </div>
+        </div>
+      </aside>
+
+      <div className="plugin-workspace">
+        <header className="plugin-topbar soft-card">
+          <div>
+            <div className="eyebrow dark">插件面板</div>
+            <h1>{skill.title}</h1>
+          </div>
+          <div className="plugin-toolbar">
+            <button type="button" className="icon-btn">↻</button>
+            <button type="button" className="icon-btn">⧉</button>
+            <button type="button" className="icon-btn">✕</button>
+          </div>
+        </header>
+
+        <div className="plugin-context soft-card">
+          <div className="context-pill">当前页面: https://example.com/pricing</div>
+          <div className="context-pill">页面类型: 产品页</div>
+          <div className="context-pill">目标: GEO优化</div>
+          <div className="context-pill highlight">结构评分: {score}/100</div>
+        </div>
+
+        <div className="plugin-grid">
+          <section className="plugin-main soft-card">
+            <div className="section-heading section-heading-tight">
+              <h2>页面体检</h2>
+              <p>把当前页面当成真实网页来检查，直接给出可执行的修改建议。</p>
+            </div>
+
+            <div className="plugin-form">
+              {Object.entries(form).map(([label, value]) => (
+                <label key={label} className="field-item">
+                  <span>{label}</span>
+                  <input
+                    value={value}
+                    onChange={(e) => setForm((prev) => ({ ...prev, [label]: e.target.value }))}
+                    placeholder={`输入${label}`}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div className="hero-actions">
+              <button
+                className="primary-btn"
+                onClick={async () => {
+                  const res = await fetch("/api/skill-run", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ skillId: skill.id, inputs: form }),
+                  });
+                  const data = await res.json();
+                  setNotes(data.outputs ?? skill.outputs);
+                }}
+              >
+                {skill.entry}
+              </button>
+              <button className="secondary-btn" onClick={() => setNotes(skill.outputs)}>重置结果</button>
+            </div>
+
+            <div className="plugin-checks">
+              <div className="check-card">
+                <span>标题</span>
+                <strong>良好</strong>
+                <p>标题覆盖主题，但还可以更贴近问题表达。</p>
+              </div>
+              <div className="check-card">
+                <span>描述</span>
+                <strong>可优化</strong>
+                <p>描述可以更短，直接强调结果和证据。</p>
+              </div>
+              <div className="check-card">
+                <span>FAQ</span>
+                <strong>建议补充</strong>
+                <p>增加可引用短句，提升抽取机会。</p>
+              </div>
+            </div>
+          </section>
+
+          <aside className="plugin-side soft-card">
+            <div className="section-heading section-heading-tight">
+              <h2>结果摘要</h2>
+              <p>这是给用户看的可执行输出，不是空洞的诊断说明。</p>
+            </div>
+            <div className="summary-score">
+              <div>
+                <span>综合评分</span>
+                <strong>{score}</strong>
+              </div>
+              <div>
+                <span>状态</span>
+                <strong>需要微调</strong>
+              </div>
+            </div>
+            <ul className="summary-list">
+              {notes.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <div className="plugin-output">
+              <div className="eyebrow dark">可复制建议</div>
+              <p>
+                当前页面建议优先补充“问题-答案-证据”结构，再优化标题和FAQ，提升被AI搜索抽取和引用的概率。
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const rootRoute = createRootRoute({ component: AppShell });
 const routeTree = rootRoute.addChildren([
   createRoute({ getParentRoute: () => rootRoute, path: "/", component: HomePage }),
@@ -468,4 +638,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
-
